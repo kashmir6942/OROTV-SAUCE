@@ -70,9 +70,9 @@ export default function RegisterPage() {
       {/* Light TV Logo */}
       <div className="mb-8 flex flex-col items-center">
         <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/L%20ght-IENA05Jy09LOJLqZ0Ptt2Sl6TPQhqj.png"
+          src="/images/light-tv-logo.png"
           alt="Light TV"
-          width={150}
+          width={180}
           height={100}
           className="mb-2"
           priority

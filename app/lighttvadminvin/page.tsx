@@ -63,9 +63,9 @@ export default function AdminPanel() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/L%20ght-IENA05Jy09LOJLqZ0Ptt2Sl6TPQhqj.png"
+            src="/images/light-tv-logo.png"
             alt="Light TV"
-            width={80}
+            width={100}
             height={50}
           />
           <div>

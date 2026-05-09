@@ -25,9 +25,9 @@ export function Header({ onSearchClick }: HeaderProps) {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/L%20ght-IENA05Jy09LOJLqZ0Ptt2Sl6TPQhqj.png"
+            src="/images/light-tv-logo.png"
             alt="Light TV"
-            width={80}
+            width={120}
             height={50}
             className="h-10 w-auto"
             priority

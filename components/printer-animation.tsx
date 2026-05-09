@@ -1,149 +1,170 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface PrinterAnimationProps {
-  status: 'pending' | 'approved' | 'rejected' | 'not_registered'
+  status: 'pending' | 'approved' | 'rejected' | 'not_registered' | 'loading'
   username?: string
+  onComplete?: () => void
 }
 
-export function PrinterAnimation({ status, username }: PrinterAnimationProps) {
-  const router = useRouter()
-  const [phase, setPhase] = useState<'printing' | 'complete' | 'cutting'>('printing')
+export function PrinterAnimation({ status, username, onComplete }: PrinterAnimationProps) {
+  const [phase, setPhase] = useState<'idle' | 'printing' | 'complete' | 'cutting' | 'cut'>('idle')
 
   useEffect(() => {
-    if (status === 'approved') {
-      const timer = setTimeout(() => {
+    // Start printing animation
+    setPhase('printing')
+
+    const printTimeout = setTimeout(() => {
+      if (status === 'approved') {
         setPhase('complete')
         setTimeout(() => {
-          router.push('/dashboard')
-        }, 1000)
-      }, 3000)
-      return () => clearTimeout(timer)
-    } else if (status === 'rejected' || status === 'not_registered') {
-      const timer = setTimeout(() => {
+          onComplete?.()
+        }, 1500)
+      } else if (status === 'rejected' || status === 'not_registered') {
         setPhase('cutting')
         setTimeout(() => {
-          router.push('/register')
-        }, 1500)
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [status, router])
+          setPhase('cut')
+          setTimeout(() => {
+            onComplete?.()
+          }, 1000)
+        }, 800)
+      } else if (status === 'pending') {
+        setPhase('complete')
+      }
+    }, 2500)
+
+    return () => clearTimeout(printTimeout)
+  }, [status, onComplete])
 
   const getMessage = () => {
     switch (status) {
       case 'pending':
-        return 'Your registration is pending approval. Please wait for admin verification.'
+        return 'Awaiting Admin Approval'
       case 'approved':
-        return `Welcome back, ${username}! Access granted.`
+        return `Welcome, ${username || 'User'}!`
       case 'rejected':
-        return 'Your registration was rejected. Please register again.'
+        return 'Registration Rejected'
       case 'not_registered':
-        return 'You are not registered. Redirecting to registration...'
+        return 'Not Registered'
       default:
-        return ''
+        return 'Processing...'
     }
   }
 
-  const getStatusColor = () => {
+  const getStatusEmoji = () => {
     switch (status) {
       case 'approved':
-        return 'text-green-500'
+        return '✓'
       case 'rejected':
       case 'not_registered':
-        return 'text-red-500'
+        return '✗'
       default:
-        return 'text-primary'
+        return '⏳'
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex items-center justify-center z-50">
-      <div className="flex flex-col items-center gap-8">
-        {/* Printer Body */}
-        <div className="relative w-80">
-          {/* Printer top */}
-          <div className="bg-secondary rounded-t-lg h-8 w-full border-x border-t border-border" />
-          
-          {/* Paper slot */}
-          <div className="bg-muted h-2 w-full" />
-          
-          {/* Paper coming out */}
-          <div className="relative overflow-hidden h-64">
-            <div
-              className={`
-                absolute w-full bg-white rounded-b-sm shadow-lg
-                ${phase === 'printing' ? 'animate-printer-feed' : ''}
-                ${phase === 'cutting' ? 'animate-paper-cut' : ''}
-              `}
-              style={{ 
-                minHeight: '250px',
-                transformOrigin: 'top center'
-              }}
-            >
-              {/* Paper content */}
-              <div className="p-6 text-background">
-                {/* Light TV Logo on paper */}
-                <div className="flex items-center gap-2 mb-4 border-b border-gray-300 pb-4">
-                  <svg width="40" height="30" viewBox="0 0 120 80">
-                    <ellipse cx="35" cy="25" rx="12" ry="14" fill="none" stroke="#0a0a0a" strokeWidth="2" />
-                    <path d="M28 38 L28 44 L42 44 L42 38" fill="none" stroke="#0a0a0a" strokeWidth="2" />
-                    <line x1="35" y1="5" x2="35" y2="0" stroke="#0a0a0a" strokeWidth="2" />
-                    <line x1="22" y1="12" x2="18" y2="8" stroke="#0a0a0a" strokeWidth="2" />
-                    <line x1="48" y1="12" x2="52" y2="8" stroke="#0a0a0a" strokeWidth="2" />
-                    <text x="55" y="35" fill="#0a0a0a" fontSize="18" fontWeight="bold">ght TV</text>
-                  </svg>
+    <div className="flex flex-col items-center gap-6">
+      {/* Printer Body */}
+      <div className="relative w-72">
+        {/* Printer top with slot */}
+        <div className="bg-gradient-to-b from-zinc-700 to-zinc-800 rounded-t-2xl h-10 w-full border-x border-t border-zinc-600 shadow-lg">
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-zinc-900 rounded-full" />
+        </div>
+        
+        {/* Paper slot */}
+        <div className="bg-zinc-900 h-3 w-full shadow-inner" />
+        
+        {/* Paper coming out */}
+        <div className="relative overflow-hidden h-56">
+          <div
+            className={`
+              absolute left-0 right-0 mx-auto w-[90%] bg-white rounded-b-sm shadow-xl
+              transition-all duration-1000 ease-out
+              ${phase === 'idle' ? 'translate-y-[-100%]' : ''}
+              ${phase === 'printing' ? 'translate-y-0' : ''}
+              ${phase === 'complete' ? 'translate-y-0' : ''}
+              ${phase === 'cutting' ? 'translate-y-0 opacity-100' : ''}
+              ${phase === 'cut' ? 'translate-y-[200%] rotate-12 opacity-0' : ''}
+            `}
+            style={{ 
+              minHeight: '220px',
+              transformOrigin: 'top center'
+            }}
+          >
+            {/* Dotted cut line for rejected */}
+            {(status === 'rejected' || status === 'not_registered') && phase === 'cutting' && (
+              <div className="absolute top-0 left-0 right-0 h-0.5 border-t-2 border-dashed border-red-400 animate-pulse" />
+            )}
+            
+            {/* Paper content */}
+            <div className="p-5 text-zinc-900">
+              {/* Logo area */}
+              <div className="flex items-center justify-center gap-2 mb-4 pb-3 border-b border-zinc-200">
+                <div className="text-xs font-bold tracking-wider text-zinc-600">LIGHT TV</div>
+              </div>
+              
+              {/* Status Badge */}
+              <div className={`
+                mx-auto w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mb-4
+                ${status === 'approved' ? 'bg-green-100 text-green-600' : ''}
+                ${status === 'rejected' || status === 'not_registered' ? 'bg-red-100 text-red-600' : ''}
+                ${status === 'pending' ? 'bg-yellow-100 text-yellow-600' : ''}
+              `}>
+                {getStatusEmoji()}
+              </div>
+              
+              {/* Status Text */}
+              <div className="text-center space-y-2">
+                <div className={`text-lg font-bold
+                  ${status === 'approved' ? 'text-green-600' : ''}
+                  ${status === 'rejected' || status === 'not_registered' ? 'text-red-600' : ''}
+                  ${status === 'pending' ? 'text-yellow-600' : ''}
+                `}>
+                  {getMessage()}
                 </div>
                 
-                {/* Status */}
-                <div className="space-y-3">
-                  <div className="text-sm text-gray-500">User Status</div>
-                  <div className={`text-lg font-bold capitalize ${
-                    status === 'approved' ? 'text-green-600' : 
-                    status === 'rejected' || status === 'not_registered' ? 'text-red-600' : 
-                    'text-yellow-600'
-                  }`}>
-                    {status === 'not_registered' ? 'Not Registered' : status}
+                {username && (
+                  <div className="text-sm text-zinc-500">
+                    User: <span className="font-medium text-zinc-700">{username}</span>
                   </div>
-                  
-                  {username && (
-                    <>
-                      <div className="text-sm text-gray-500 mt-4">Username</div>
-                      <div className="text-base font-medium">{username}</div>
-                    </>
-                  )}
-                  
-                  <div className="mt-6 pt-4 border-t border-gray-300 text-sm text-gray-600">
-                    {getMessage()}
-                  </div>
+                )}
+                
+                <div className="text-xs text-zinc-400 pt-2">
+                  {new Date().toLocaleDateString()}
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Printer bottom */}
-          <div className="bg-secondary rounded-b-lg h-12 w-full border-x border-b border-border flex items-center justify-center gap-2">
-            {/* Printer rollers */}
-            <div className={`w-4 h-4 bg-muted rounded-full ${phase === 'printing' ? 'animate-printer-roller' : ''}`}>
-              <div className="w-1 h-4 bg-border mx-auto" />
-            </div>
-            <div className={`w-4 h-4 bg-muted rounded-full ${phase === 'printing' ? 'animate-printer-roller' : ''}`}>
-              <div className="w-1 h-4 bg-border mx-auto" />
-            </div>
+            
+            {/* Paper tear edge for cut effect */}
+            {phase === 'cut' && (
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-b from-zinc-200 to-transparent" 
+                   style={{ clipPath: 'polygon(0 0, 5% 100%, 10% 0, 15% 100%, 20% 0, 25% 100%, 30% 0, 35% 100%, 40% 0, 45% 100%, 50% 0, 55% 100%, 60% 0, 65% 100%, 70% 0, 75% 100%, 80% 0, 85% 100%, 90% 0, 95% 100%, 100% 0)' }} />
+            )}
           </div>
         </div>
         
-        {/* Status message below printer */}
-        <div className={`text-center ${getStatusColor()}`}>
-          <p className="text-lg font-medium">{getMessage()}</p>
-          {status === 'pending' && (
-            <p className="text-sm text-muted-foreground mt-2">
-              Please check back later or contact admin
-            </p>
-          )}
+        {/* Printer bottom with rollers */}
+        <div className="bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-b-2xl h-14 w-full border-x border-b border-zinc-700 flex items-center justify-center gap-6 shadow-lg">
+          {/* Animated rollers */}
+          <div className={`w-5 h-5 bg-zinc-600 rounded-full border-2 border-zinc-500 ${phase === 'printing' ? 'animate-spin' : ''}`}>
+            <div className="w-full h-0.5 bg-zinc-400 mt-2" />
+          </div>
+          <div className="w-20 h-2 bg-zinc-700 rounded-full" />
+          <div className={`w-5 h-5 bg-zinc-600 rounded-full border-2 border-zinc-500 ${phase === 'printing' ? 'animate-spin' : ''}`}>
+            <div className="w-full h-0.5 bg-zinc-400 mt-2" />
+          </div>
         </div>
+        
+        {/* Status LED */}
+        <div className={`
+          absolute top-3 right-4 w-2 h-2 rounded-full
+          ${status === 'approved' ? 'bg-green-500 shadow-green-500/50' : ''}
+          ${status === 'rejected' || status === 'not_registered' ? 'bg-red-500 shadow-red-500/50' : ''}
+          ${status === 'pending' ? 'bg-yellow-500 shadow-yellow-500/50' : ''}
+          shadow-lg animate-pulse
+        `} />
       </div>
     </div>
   )

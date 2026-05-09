@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 interface HeaderProps {
@@ -57,6 +58,31 @@ export function Header({ onSearchClick }: HeaderProps) {
             </svg>
             <span className="hidden sm:inline text-sm">Search</span>
           </button>
+
+          {/* Settings Button */}
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-muted rounded-lg transition-colors"
+            aria-label="Settings"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="1" />
+              <path d="M12 1v6m0 6v6" />
+              <path d="M4.22 4.22l4.24 4.24m0 5.08l-4.24 4.24" />
+              <path d="M19.78 4.22l-4.24 4.24m0 5.08l4.24 4.24" />
+            </svg>
+            <span className="hidden sm:inline text-sm">Settings</span>
+          </Link>
 
           {/* Logout Button */}
           <button

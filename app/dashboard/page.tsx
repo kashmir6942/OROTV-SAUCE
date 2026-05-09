@@ -8,6 +8,8 @@ import { ContentSection } from '@/components/content-section'
 import { SearchModal } from '@/components/search-modal'
 import { LiveTVModal } from '@/components/live-tv-modal'
 import { PrinterAnimation } from '@/components/printer-animation'
+import { AdBlocker } from '@/components/ad-blocker'
+import { ReferralSection } from '@/components/referral-section'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -76,6 +78,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdBlocker />
       <Header onSearchClick={() => setShowSearch(true)} />
       
       {/* Navigation Tabs */}
@@ -108,6 +111,7 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-6">
         {activeTab === 'movies' && (
           <div className="space-y-8">
+            <ReferralSection />
             <ContentSection title="Trending Movies" type="movie" category="trending" />
             <ContentSection title="Popular Movies" type="movie" category="popular" />
             <ContentSection title="Top Rated Movies" type="movie" category="top_rated" />

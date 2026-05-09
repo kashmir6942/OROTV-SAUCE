@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+// @ts-ignore
 import bcrypt from 'bcryptjs'
 import { headers } from 'next/headers'
 

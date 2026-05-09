@@ -23,9 +23,9 @@ export function AdBlocker() {
       'amazon-adsystem.com',
     ]
 
-    // Create script blocker
-    const originalFetch = window.fetch
-    window.fetch = function (...args) {
+    // Block fetch requests to ad networks
+    const originalFetch = window.fetch as any
+    window.fetch = async function (...args: any[]) {
       const url = typeof args[0] === 'string' ? args[0] : args[0]?.toString() || ''
 
       // Block requests to known ad networks
@@ -36,12 +36,12 @@ export function AdBlocker() {
         }
       }
 
-      return originalFetch.apply(this, args)
+      return originalFetch(...args)
     }
 
     // Block iframes from ad networks
-    const originalIframe = HTMLIFrameElement.prototype.setAttribute
-    HTMLIFrameElement.prototype.setAttribute = function (name, value) {
+    const originalSetAttribute = HTMLIFrameElement.prototype.setAttribute
+    HTMLIFrameElement.prototype.setAttribute = function (name: string, value: string) {
       if (name === 'src') {
         for (const adNetwork of adNetworks) {
           if (value.includes(adNetwork)) {
@@ -50,7 +50,7 @@ export function AdBlocker() {
           }
         }
       }
-      return originalIframe.call(this, name, value)
+      return originalSetAttribute.call(this, name, value)
     }
 
     // Block script tags from ad networks

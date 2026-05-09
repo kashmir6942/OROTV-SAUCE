@@ -8,9 +8,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Light TV - Free Streaming',
-  description: 'Watch movies, TV series, and anime for free on Light TV',
-  keywords: ['streaming', 'movies', 'tv series', 'anime', 'free'],
+  title: 'Light TV - Premium Streaming Experience',
+  description: 'Watch movies, TV series, and anime for free on Light TV with ad-free streaming',
+  keywords: ['streaming', 'movies', 'tv series', 'anime', 'free', 'light-tv'],
 }
 
 export const viewport: Viewport = {

@@ -9,30 +9,30 @@ export function middleware(request: NextRequest) {
     request.headers.get('x-real-ip') ||
     'unknown'
 
-  // Store IP in response headers (will be set in client via localStorage)
+  // Store IP in response headers
   const response = NextResponse.next()
   response.headers.set('x-client-ip', ip)
 
-  // Protect admin panel
+  // Allow admin panel without auth - it's a secret URL
   if (pathname === '/lighttvadminvin') {
-    const adminSecret = process.env.ADMIN_SECRET
-    const auth = request.headers.get('authorization')
-
-    if (!auth || !auth.startsWith('Bearer ')) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-
-    const token = auth.substring(7)
-    if (token !== adminSecret) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
+    return response
   }
 
-  // Protect dashboard - must be logged in
+  // Allow permanent bypass route
+  if (pathname === '/permanentmoa') {
+    return response
+  }
+
+  // Allow token-based user content URLs
+  if (pathname.startsWith('/user/usermovies/')) {
+    return response
+  }
+
+  // Protect dashboard - must be logged in and approved
   if (pathname === '/dashboard') {
     const sessionCookie = request.cookies.get('lightTVSession')
     if (!sessionCookie) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
@@ -40,5 +40,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/lighttvadminvin', '/dashboard', '/pending', '/rejected'],
+  matcher: ['/lighttvadminvin', '/dashboard', '/pending', '/rejected', '/permanentmoa', '/user/:path*'],
 }
